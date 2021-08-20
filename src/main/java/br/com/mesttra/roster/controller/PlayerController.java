@@ -1,14 +1,18 @@
 package br.com.mesttra.roster.controller;
 
+import br.com.mesttra.roster.dto.AvailabilityDTO;
 import br.com.mesttra.roster.entity.Player;
 import br.com.mesttra.roster.service.PlayerService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import io.swagger.annotations.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/players")
+@Api(value = "Players", tags = { "Players" })
 public class PlayerController {
 
     PlayerService playerService;
@@ -18,8 +22,40 @@ public class PlayerController {
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    @ApiOperation(value = "Add player",
+            notes = "This method adds a new player")
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = "Player added"),
+            @ApiResponse(code = 500, message = "Internal Error"),
+    })
     public Player addPlayer(@RequestBody Player player) {
         return playerService.addPlayer(player);
+    }
+
+    @GetMapping
+    public List<Player> listPlayer() { return playerService.listPlayers();}
+
+    @GetMapping(path = "/{id}")
+    public Optional<Player> getPlayer(
+            @ApiParam(
+                    name =  "id",
+                    type = "Long",
+                    value = "Player id",
+                    example = "2",
+                    required = true)
+            @PathVariable Long id) {
+        return playerService.getPlayer(id);
+    }
+
+    @DeleteMapping(path = "/{id}")
+    public String removePlayer(@PathVariable Long id) {
+        return playerService.removePlayer(id);
+    }
+
+    @PatchMapping(path = "/{id}")
+    public Player changePlayerAvailability(@PathVariable Long id, @RequestBody AvailabilityDTO availabilityDTO) {
+        return playerService.changePlayerAvailability(id, availabilityDTO.isAvailable());
     }
 
 
